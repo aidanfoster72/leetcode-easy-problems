@@ -154,3 +154,186 @@ class Solution(object):
 
 
 
+class Solution(object):
+    def lengthOfLastWord(self, s):
+        return len(s.split()[-1])
+    
+#print(Solution().lengthOfLastWord("Hello World"))
+
+
+
+class Solution(object):
+    def plusOne(self, digits):
+        digits = [str(i) for i in digits]
+        digits = int("".join(digits)) + 1
+        digits = [int(i) for i in str(digits)]
+        return digits
+        
+# print(Solution().plusOne([9]))
+
+
+
+class Solution(object):
+    def addBinary(self, a, b):
+        return bin(int(a, 2) + int(b, 2))[2:]
+    
+# print(Solution().addBinary("11","1001"))
+
+
+
+
+import math
+
+class Solution:
+    def mySqrt(self, x):
+        y = int(math.sqrt(x))
+        return y
+
+
+#print(Solution().mySqrt(1))
+
+
+
+class Solution(object):
+    def climbStairs(self, n):
+        if n == 1:
+            return 1
+        if n == 2:
+            return 2
+        return self.climbStairs(n-1) + self.climbStairs(n-2)
+
+# print(Solution().climbStairs(44))
+        
+
+
+
+class ListNode(object):
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+class Solution(object):
+    def deleteDuplicates(self, head):
+        current = head
+
+        while current and current.next:
+            if current.val == current.next.val:
+                current.next = current.next.next
+            else:
+                current = current.next
+
+        return head
+
+# print(Solution().deleteDuplicates([1,1,2,3,3]))
+
+
+
+
+
+class ListNode(object):
+
+    def __init__(self, key, val):
+        self.key = key
+        self.val = val
+        self.prev = None
+        self.next = None
+
+
+class LRUCache(object):
+
+    def __init__(self, capacity):
+        self.head = ListNode(-1, -1)
+        self.tail = ListNode(-1, -1)
+        self.head.next = self.tail
+        self.tail.prev = self.head
+        self.size = 0
+        self.capacity = capacity
+        self.nodeMap = {}
+
+
+    def get(self, key):
+        if key in self.nodeMap:
+            node = self.nodeMap[key]
+            self.remove(node)
+            self.add(node)
+            return node.val
+        return -1 
+
+
+    def put(self, key, value):
+        if key in self.nodeMap:
+            node = self.nodeMap[key]
+            node.val = value
+            self.remove(node)
+            self.add(node)
+        else:
+            newNode = ListNode(key, value)
+            self.nodeMap[key] = newNode
+            self.add(newNode)
+            self.size += 1
+            if self.size > self.capacity:
+                nodeToRemove = self.tail.prev
+                del self.nodeMap[nodeToRemove.key]
+                self.remove(nodeToRemove)
+                self.size -= 1
+
+
+    def add(self, node):
+        node.next = self.head.next
+        node.prev = self.head
+        self.head.next.prev = node
+        self.head.next = node
+
+    def remove(self, node):
+        node.prev.next = node.next
+        node.next.prev = node.prev
+
+# obj = LRUCache(2)
+# obj.put(1,1)
+# obj.put(2,2)
+# print(obj.get(1))
+# obj.put(3,3)
+# print(obj.get(2))
+# obj.put(4,4)
+# print(obj.get(1))
+# print(obj.get(3))
+# print(obj.get(4))
+
+
+
+
+
+
+
+class UndergroundSystem(object):
+
+    def __init__(self):
+        self.in_map = {} 
+        self.stats = {}  
+
+    def checkIn(self, id, stationName, t):
+        self.in_map[id] = (stationName, t)
+
+    def checkOut(self, id, stationName, t):
+        start_station, t_in = self.in_map.pop(id)
+        key = (start_station, stationName)
+        total, cnt = self.stats.get(key, (0, 0))
+        self.stats[key] = (total + (t - t_in), cnt + 1)
+
+    def getAverageTime(self, startStation, endStation):
+        total, cnt = self.stats[(startStation, endStation)]
+        return float(total) / cnt
+
+
+# obj = UndergroundSystem()
+# obj.checkIn(45,"Leyton",3)
+# obj.checkIn(32,"Paradise",8)
+# obj.checkIn(27,"Leyton",10)
+# obj.checkOut(45,"Waterloo",15)
+# obj.checkOut(27,"Waterloo",20)
+# obj.checkOut(32,"Cambridge",22)
+# print(obj.getAverageTime("Paradise","Cambridge"))
+# print(obj.getAverageTime("Leyton","Waterloo"))
+# obj.checkIn(10,"Leyton",24)
+# print(obj.getAverageTime("Leyton","Waterloo"))
+
