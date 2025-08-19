@@ -514,8 +514,96 @@ class Solution(object):
             return 0
         return int(x)
 
-print(Solution().reverse(123))
-print(Solution().reverse(-123))
-print(Solution().reverse(120))
-print(Solution().reverse(0))
-print(Solution().reverse(1534236469))
+# print(Solution().reverse(123))
+# print(Solution().reverse(-123))
+# print(Solution().reverse(120))
+# print(Solution().reverse(0))
+# print(Solution().reverse(1534236469))
+
+
+
+
+# 8. string to integer (atoi)
+
+class Solution(object):
+    def myAtoi(self, s):
+        s = s.strip()
+        if not s:
+            return 0
+        sign = 1
+        if s[0] == "-":
+            sign = -1
+            s = s[1:]
+        elif s[0] == "+":
+            s = s[1:]
+        num = 0
+        for char in s:
+            if char.isdigit():
+                num = num * 10 + int(char)
+            else:
+                break
+        num = sign * num
+        if num > 2**31 - 1:
+            return 2**31 - 1
+        elif num < -2**31:
+            return -2**31
+        return num
+
+# print(Solution().myAtoi("42"))
+# print(Solution().myAtoi("   -42"))
+# print(Solution().myAtoi("4193 with words"))
+# print(Solution().myAtoi("words and 987"))
+# print(Solution().myAtoi("1337c0d3"))
+# print(Solution().myAtoi("-91283472332"))
+
+
+# 9. palindrome number
+
+class Solution(object):
+    def isPalindrome(self, x):
+        x = str(x)
+        if x == x[::-1]:
+            return True
+        else:
+            return False
+
+# print(Solution().isPalindrome(121))
+
+
+# 10. regular expression matching
+
+
+class Solution(object):
+    def isMatch(self, s, p):
+        memo = {}
+
+        def dp(i, j):
+            if (i, j) in memo:
+                return memo[(i, j)]
+
+            if j == len(p):
+                return i == len(s)
+
+            first = i < len(s) and (p[j] == s[i] or p[j] == '.')
+
+            if j + 1 < len(p) and p[j + 1] == '*':
+                ans = dp(i, j + 2) or (first and dp(i + 1, j))
+            else:
+                ans = first and dp(i + 1, j + 1)
+
+            memo[(i, j)] = ans
+            return ans
+
+        return dp(0, 0)
+
+            
+print(Solution().isMatch("aa", "a"))  
+print(Solution().isMatch("aa", "a*"))
+print(Solution().isMatch("ab", ".*"))
+print(Solution().isMatch("aab", "c*a*b"))
+print(Solution().isMatch("mississippi", "mis*is*p*."))
+
+
+
+
+# 11. container with most water
