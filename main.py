@@ -597,13 +597,209 @@ class Solution(object):
         return dp(0, 0)
 
             
-print(Solution().isMatch("aa", "a"))  
-print(Solution().isMatch("aa", "a*"))
-print(Solution().isMatch("ab", ".*"))
-print(Solution().isMatch("aab", "c*a*b"))
-print(Solution().isMatch("mississippi", "mis*is*p*."))
+# print(Solution().isMatch("aa", "a"))  
+# print(Solution().isMatch("aa", "a*"))
+# print(Solution().isMatch("ab", ".*"))
+# print(Solution().isMatch("aab", "c*a*b"))
+# print(Solution().isMatch("mississippi", "mis*is*p*."))
 
 
 
 
 # 11. container with most water
+
+
+
+# 18. 4 sum
+
+class Solution(object):
+    def fourSum(self, nums, target):
+        nums.sort()
+        result = []
+        n = len(nums)
+
+        for i in range(n - 3):
+            if i > 0 and nums[i] == nums[i - 1]:
+                continue
+
+            for j in range(i + 1, n - 2):
+                if j > i + 1 and nums[j] == nums[j - 1]:
+                    continue
+
+                left, right = j + 1, n - 1
+                while left < right:
+                    current_sum = nums[i] + nums[j] + nums[left] + nums[right]
+                    if current_sum == target:
+                        result.append([nums[i], nums[j], nums[left], nums[right]])
+                        while left < right and nums[left] == nums[left + 1]:
+                            left += 1
+                        while left < right and nums[right] == nums[right - 1]:
+                            right -= 1
+                        left += 1
+                        right -= 1
+                    elif current_sum < target:
+                        left += 1
+                    else:
+                        right -= 1
+
+        return result
+
+# print(Solution().fourSum([1,0,-1,0,-2,2], 0))
+# print(Solution().fourSum([2,2,2,2,2], 8))
+
+
+
+# 19. remove nth node from end of list
+
+class Solution(object):
+    def removeNthFromEnd(self, head, n):
+        dummy = ListNode(0)
+        dummy.next = head
+        first = dummy
+        second = dummy
+        for i in range(n + 1):
+            first = first.next
+        while first:
+            first = first.next
+            second = second.next
+        second.next = second.next.next
+        return dummy.next
+
+
+
+def build_linked_list(lst):
+    dummy = ListNode(0)
+    current = dummy
+    for val in lst:
+        current.next = ListNode(val)
+        current = current.next
+    return dummy.next
+
+def print_linked_list(node):
+    result = []
+    while node:
+        result.append(node.val)
+        node = node.next
+    print(result)
+
+# l1 = build_linked_list([1,2,3,4,5])
+# print_linked_list(l1)
+# print("--------------------------------")
+# print_linked_list(Solution().removeNthFromEnd(l1, 2))
+
+
+
+
+
+
+
+
+
+
+class Solution(object):
+    def FizzBuzz(self, n):
+        result = []
+        for i in range(1, n+1):
+            if i % 3 == 0 and i % 5 == 0:
+                result.append("FizzBuzz")
+            elif i % 3 == 0:
+                result.append("Fizz")
+            elif i % 5 == 0:
+                result.append("Buzz")
+            else:
+                result.append(str(i))
+        return result
+
+# print(Solution().FizzBuzz(100))
+
+
+class Solution(object):
+
+    def removeIslands(self, matrix):
+        rows, cols = len(matrix), len(matrix[0])
+        visited = [[0] * cols for _ in range(rows)]
+
+        for i in range(rows):
+                if matrix[i][0] == 1 and visited[i][0] == 0:
+                    self.dfs(matrix, i, 0, visited)
+        for i in range(rows):
+                if matrix[i][cols-1] == 1 and visited[i][cols-1] == 0:
+                    self.dfs(matrix, i, cols-1, visited)
+        for i in range(cols):
+                if matrix[0][i] == 1 and visited[0][i] == 0:
+                    self.dfs(matrix, 0, i, visited)
+        for i in range(cols):
+                if matrix[rows-1][i] == 1 and visited[rows-1][i] == 0:
+                    self.dfs(matrix, rows-1, i, visited)
+
+        for i in range(rows):
+            print(visited[i])
+        return visited
+
+
+    def dfs(self, matrix, x, y, visited):
+        rows, cols = len(matrix), len(matrix[0])
+
+        if x < 0 or x >= rows or y < 0 or y >=cols:
+            return
+
+        if matrix[x][y] == 0 or visited[x][y] == 1:
+            return
+        
+        visited[x][y] = 1
+
+        directions = [(1,0), (-1,0), (0,1), (0,-1)]
+        for dx, dy in directions:
+            self.dfs(matrix, x + dx, y + dy, visited)
+        
+
+# print(Solution().removeIslands([[1,1,1,1,1,1],[1,0,0,0,0,1],[1,0,1,1,0,1],[1,0,1,1,0,1],[1,0,1,0,0,1],[1,1,1,1,1,1]]))
+
+
+
+
+
+class Solution(object):
+    def generate(self, result, current, left, right, n):
+        if len(current) == 2 * n:
+            result.append(current)
+            return
+        if left < n:
+            self.generate(result, current + "(", left + 1, right, n)        
+        if right < left:
+            self.generate(result, current + ")", left, right + 1, n)
+
+    def generateParenthesis(self, n):
+        result = []
+        self.generate(result, "", 0, 0, n)
+        return result
+
+# print(Solution().generateParenthesis(3))
+
+
+# 23. merge k sorted lists
+
+class Solution(object):
+    def mergeKLists(self, lists):
+        if not lists:
+            return None
+        while len(lists) > 1:
+            merged = []
+            for i in range(0, len(lists), 2):
+                l1 = lists[i]
+                l2 = lists[i+1] if i+1 < len(lists) else None
+                merged.append(self._mergeTwo(l1, l2))
+            lists = merged
+        return lists[0]
+
+    def _mergeTwo(self, a, b):
+        dummy = tail = ListNode(0)
+        while a and b:
+            if a.val <= b.val:
+                tail.next, a = a, a.next
+            else:
+                tail.next, b = b, b.next
+            tail = tail.next
+        tail.next = a or b
+        return dummy.next
+
