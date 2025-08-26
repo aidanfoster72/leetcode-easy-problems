@@ -802,4 +802,467 @@ class Solution(object):
             tail = tail.next
         tail.next = a or b
         return dummy.next
+    
 
+
+
+
+# 498 Diagonal Traverse
+
+class Solution(object):
+    def findDiagonalOrder(self, mat):
+        if not mat or not mat[0]:
+            return []
+
+        m, n = len(mat), len(mat[0])
+        result = []
+        row, col = 0, 0
+        direction = 1  # 1 = up-right, -1 = down-left
+
+        for _ in range(m * n):
+            result.append(mat[row][col])
+
+            # Moving up-right
+            if direction == 1:
+                if col == n - 1:
+                    row += 1
+                    direction = -1
+                elif row == 0:
+                    col += 1
+                    direction = -1
+                else:
+                    row -= 1
+                    col += 1
+
+            # Moving down-left
+            else:
+                if row == m - 1:
+                    col += 1
+                    direction = 1
+                elif col == 0:
+                    row += 1
+                    direction = 1
+                else:
+                    row += 1
+                    col -= 1
+
+        return result
+
+
+# Test cases
+# print(Solution().findDiagonalOrder([[1,2,3],[4,5,6],[7,8,9]]))  # [1,2,4,7,5,3,6,8,9]
+# print(Solution().findDiagonalOrder([[1,2],[3,4]]))              # [1,2,3,4]
+
+
+class Solution(object):
+    def longestValidParentheses(self, s):
+        best = 0
+        stack = [-1]  # base for length calc
+        for i, ch in enumerate(s):
+            if ch == '(':
+                stack.append(i)
+            else:
+                stack.pop()
+                if not stack:
+                    stack.append(i)       # reset base after unmatched ')'
+                else:
+                    best = max(best, i - stack[-1])
+        return best
+
+# print(Solution().longestValidParentheses("(((("))
+
+
+class Solution(object):
+    def search(self, nums, target):
+        left, right = 0, len(nums) - 1
+        while left < right:
+            mid = (left + right) // 2
+            if nums[left] <= nums[mid]:
+                if nums[left] <= target <= nums[mid]:
+                    if nums[left] == target: return left
+                    if nums[right] == target: return right
+                    if nums[mid] == target: return mid
+                    right = mid - 1
+                else:
+                    left = mid + 1
+            elif nums[mid] < nums[right]:
+                if nums[mid] <= target <= nums[right]:
+                    if nums[left] == target: return left
+                    if nums[right] == target: return right
+                    if nums[mid] == target: return mid
+                    left = mid + 1
+                else:
+                    right = mid - 1
+            else:
+                break
+        if (left == right) and (nums[left] == target):
+            return left
+        return -1
+
+# print(Solution().search([4,5,6,7,0,1,2], 8))
+        
+
+
+class Solution(object):
+    def searchRange(self, nums, target):
+        max = 0
+        min = 0
+        minflag = True
+        validflag = False
+        counter = 0
+        output = []
+        for i in nums:
+            if i > target:
+                break
+            if target == i:
+                validflag = True
+                if minflag == True:
+                    min = counter
+                    minflag = False
+                max = counter
+            counter += 1
+        if validflag == True:
+            output.append(min)
+            output.append(max)
+            return output
+        else:
+            return [-1,-1]
+        
+
+
+class Solution(object):
+    def isValidSudoku(self, board):
+        rows = [set() for _ in range(9)]
+        cols = [set() for _ in range(9)]
+        boxes = [set() for _ in range(9)]  # box index = (r//3)*3 + (c//3)
+
+        for r in range(9):
+            for c in range(9):
+                val = board[r][c]
+                if val == '.':
+                    continue
+                b = (r // 3) * 3 + (c // 3)
+                if val in rows[r] or val in cols[c] or val in boxes[b]:
+                    return False
+                rows[r].add(val)
+                cols[c].add(val)
+                boxes[b].add(val)
+        return True
+
+
+class Solution(object):
+    def solveSudoku(self, board):
+        # Bit masks for digits 1..9 used in each row/col/box
+        rows = [0] * 9
+        cols = [0] * 9
+        boxes = [0] * 9
+        empties = []
+
+        def box_id(r, c): return (r // 3) * 3 + (c // 3)
+        def bit(d): return 1 << (ord(d) - ord('1'))  # '1'->1<<0, ..., '9'->1<<8
+
+        # Initialize masks and collect empty cells
+        for r in range(9):
+            for c in range(9):
+                ch = board[r][c]
+                if ch == '.':
+                    empties.append((r, c))
+                else:
+                    b = box_id(r, c)
+                    mask = bit(ch)
+                    rows[r] |= mask
+                    cols[c] |= mask
+                    boxes[b] |= mask
+
+        # Precompute all digits as bitset (bits 0..8)
+        FULL = (1 << 9) - 1
+
+        # Choose-next-variable heuristic: pick the cell with fewest candidates
+        def pick_next():
+            best_i = -1
+            best_opts = FULL + 1
+            for i, (r, c) in enumerate(empties):
+                b = box_id(r, c)
+                used = rows[r] | cols[c] | boxes[b]
+                opts = FULL & ~used
+                cnt = bin(opts).count("1")  # count set bits (candidates)
+                if cnt < best_opts:
+                    best_opts = cnt
+                    best_i = i
+                    if cnt == 1:
+                        break
+            return best_i
+
+
+        def backtrack():
+            if not empties:
+                return True
+            i = pick_next()
+            r, c = empties[i]
+            # swap picked with last to pop efficiently
+            empties[i], empties[-1] = empties[-1], empties[i]
+            r, c = empties.pop()
+
+            b = box_id(r, c)
+            used = rows[r] | cols[c] | boxes[b]
+            opts = FULL & ~used  # bits for possible digits
+
+            while opts:
+                lsb = opts & -opts
+                d_idx = (lsb.bit_length() - 1)  # 0..8
+                ch = chr(ord('1') + d_idx)
+
+                # place
+                board[r][c] = ch
+                rows[r] |= lsb
+                cols[c] |= lsb
+                boxes[b] |= lsb
+
+                if backtrack():
+                    return True
+
+                # undo
+                board[r][c] = '.'
+                rows[r] ^= lsb
+                cols[c] ^= lsb
+                boxes[b] ^= lsb
+
+                opts ^= lsb  # try next digit
+
+            # restore the empty slot and fail this branch
+            empties.append((r, c))
+            return False
+
+        backtrack()
+
+            
+
+        
+
+class Solution(object):
+    def countAndSay(self, n):
+        word = "1"
+        for _ in range(n - 1):  # n=1 means "1" directly
+            word = self.rle(word)
+        return word
+
+    def rle(self, s):
+        result = ""
+        count = 1
+        
+        for i in range(1, len(s)):
+            if s[i] == s[i - 1]:
+                count += 1
+            else:
+                result += str(count) + s[i - 1]
+                count = 1
+        
+        result += str(count) + s[-1]  # append last group
+        return result
+
+# print(Solution().countAndSay(1))  # Output: "1"
+# print(Solution().countAndSay(4))  # Output: "1211"
+
+
+
+
+class Solution(object):
+    def nonrep(self, s):
+        map = {}
+        for i in s:
+            if i not in map:
+                map[i] = 1
+            else: 
+                map[i] += 1
+        for i in map:
+            if map[i] == 1:
+                return i
+        return "_"
+    
+# print(Solution().nonrep("adbacaba"))
+
+
+class Solution(object):
+    def combinationSum(self, candidates, target):
+        candidates.sort()  # enables pruning
+        res = []
+        path = []
+
+        def dfs(start, remain):
+            if remain == 0:
+                res.append(list(path))
+                return
+            for i in range(start, len(candidates)):
+                x = candidates[i]
+                if x > remain:
+                    break  # prune
+                path.append(x)
+                # i (not i+1) because we can reuse the same number
+                dfs(i, remain - x)
+                path.pop()
+
+            # done exploring this level
+
+        dfs(0, target)
+        return res
+
+# print(Solution().combinationSum([2,3,6,7], 7))
+
+
+class Solution(object):
+    def areaOfMaxDiagonal(self, dimensions):
+        w, h = max(dimensions, key=lambda x: (x[0]*x[0] + x[1]*x[1], x[0]*x[1]))
+        return w*h
+
+
+        
+# print(Solution().areaOfMaxDiagonal([[9,3],[8,6],[5,9]]))
+
+
+
+class Solution(object):
+    def combinationSum2(self, candidates, target):
+        candidates.sort()        # sort so we can prune and skip duplicates
+        res = []
+        path = []
+
+        def dfs(start, remain):
+            if remain == 0:
+                res.append(list(path))
+                return
+
+            for i in range(start, len(candidates)):
+                # Skip duplicates at the same tree level
+                if i > start and candidates[i] == candidates[i - 1]:
+                    continue
+
+                x = candidates[i]
+                if x > remain:
+                    break  # further numbers are larger (sorted), so stop
+
+                path.append(x)
+                dfs(i + 1, remain - x)  # i+1 because each number can be used once
+                path.pop()
+
+        dfs(0, target)
+        return res
+
+
+
+class Solution(object):
+    def firstMissingPositive(self, nums):
+        nums = set(nums)
+        if 1 not in nums:
+            return 1
+        min = 1
+        while min in nums:
+            min +=1
+        return min
+        
+# print(Solution().firstMissingPositive([1,2,0]))
+# print(Solution().firstMissingPositive([7,8,9,11,12]))
+# print(Solution().firstMissingPositive([3,4,-1,1]))
+
+
+
+class Solution(object):
+    def trap(self, height):
+        h = len(height)
+        left, right = 0, h-1
+        leftMax, rightMax = 0, 0
+        water = 0
+
+        while left < right:
+            if height[left] < height[right]:
+                if height[left] >= leftMax:
+                    leftMax = height[left]
+                else:
+                    water += leftMax - height[left]
+                left += 1
+            else:
+                if height[right] >= rightMax:
+                    rightMax = height[right]
+                else: 
+                    water += rightMax - height[right]
+                right -= 1
+
+        return water
+
+            
+# print(Solution().trap([0,1,0,2,1,0,1,3,2,1,2,1]))
+# print(Solution().trap([4,2,0,3,2,5]))  
+
+
+
+
+class Solution(object):
+    def jump(self, nums):
+        n = len(nums)
+        if n <= 1:
+            return 0
+
+        jumps = 0
+        cur_end = 0      # end of current jump's reach
+        farthest = 0     # farthest reach seen so far
+
+        # We don't need to process the last index
+        for i in range(n - 1):
+            if i + nums[i] > farthest:
+                farthest = i + nums[i]
+            if i == cur_end:        # time to "commit" a jump
+                jumps += 1
+                cur_end = farthest
+                if cur_end >= n - 1:
+                    break
+        return jumps
+    
+# print(Solution().jump([2,6,4,1,1,1,1,1,1]))
+
+
+class Solution(object):
+    def permute(self, nums):
+        res, path = [], []
+        used = [False] * len(nums)
+
+        def dfs():
+            if len(path) == len(nums):
+                res.append(path[:])
+                return
+            for i, x in enumerate(nums):
+                if not used[i]:
+                    used[i] = True
+                    path.append(x)
+                    dfs()
+                    path.pop()
+                    used[i] = False
+
+        dfs()
+        return res
+    
+# print(Solution().permute([1,2,3]))
+
+
+class Solution(object):
+    def permuteUnique(self, nums):
+        res, path = [], []
+        used = [False] * len(nums)
+
+        def dfs():
+            if len(path) == len(nums):
+                res.append(path[:])
+                return
+            for i in range(len(nums)):
+                if used[i]:
+                    continue
+                if i > 0 and nums[i] == nums[i-1] and not used[i-1]:
+                    continue
+                used[i] = True
+                path.append(nums[i])
+                dfs()
+                path.pop()
+                used[i] = False
+
+        dfs()
+        return res
+    
+print(Solution().permuteUnique([1,1,3]))
