@@ -1265,4 +1265,343 @@ class Solution(object):
         dfs()
         return res
     
-print(Solution().permuteUnique([1,1,3]))
+# print(Solution().permuteUnique([1,1,3]))
+
+
+class Solution(object):
+    def rotate(self, matrix):
+        n = len(matrix)
+        for i in range(n):
+            for j in range(i, n):
+                matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
+        for i in range(n):
+            matrix[i].reverse()
+        return matrix
+    
+# print(Solution().rotate([[1,2,3],[4,5,6],[7,8,9]]))
+
+class Solution(object):
+    def lenOfVDiagonal(self, grid):
+        direction = [[-1,1],[-1,-1],[1,-1],[1,1]]
+        order = [2,0]
+        counter = 1
+        for i in range(grid):
+            for j in range(grid[i]):
+                if grid[i][j] == 1:
+                    while True:
+                        for dir in direction:
+                            print(dir)
+
+
+
+class Solution(object):
+    def lenOfVDiagonal(self, grid):
+        n = len(grid)
+        m = len(grid[0]) if n else 0
+        if n == 0 or m == 0:
+            return 0
+        dirs = [(-1, 1), (1, 1), (1, -1), (-1, -1)]
+        cw = lambda d: (d + 1) % 4  
+        dp2 = [[[0]*m for _ in range(n)] for _ in range(4)]
+        dp0 = [[[0]*m for _ in range(n)] for _ in range(4)]
+        f2  = [[[0]*m for _ in range(n)] for _ in range(4)]
+        f0  = [[[0]*m for _ in range(n)] for _ in range(4)]
+        def indices_in_reverse(di, dj):
+            irange = range(n-1, -1, -1) if di > 0 else range(n)  
+            jrange = range(m-1, -1, -1) if dj > 0 else range(m)
+            return irange, jrange
+        for d, (di, dj) in enumerate(dirs):
+            ir, jr = indices_in_reverse(di, dj)
+            for i in ir:
+                for j in jr:
+                    ni, nj = i + di, j + dj
+                    if 0 <= ni < n and 0 <= nj < m:
+                        if grid[ni][nj] == 2:
+                            dp2[d][i][j] = 1 + dp0[d][ni][nj]
+                        else:
+                            dp2[d][i][j] = 0
+                        if grid[ni][nj] == 0:
+                            dp0[d][i][j] = 1 + dp2[d][ni][nj]
+                        else:
+                            dp0[d][i][j] = 0
+                    else:
+                        dp2[d][i][j] = 0
+                        dp0[d][i][j] = 0
+        for d, (di, dj) in enumerate(dirs):
+            ir, jr = indices_in_reverse(di, dj)
+            dcw = cw(d)
+            for i in ir:
+                for j in jr:
+                    best_f2 = dp2[dcw][i][j]
+                    best_f0 = dp0[dcw][i][j]
+                    ni, nj = i + di, j + dj
+                    if 0 <= ni < n and 0 <= nj < m:
+                        if grid[ni][nj] == 2:
+                            best_f2 = max(best_f2, 1 + f0[d][ni][nj])
+                        if grid[ni][nj] == 0:
+                            best_f0 = max(best_f0, 1 + f2[d][ni][nj])
+
+                    f2[d][i][j] = best_f2
+                    f0[d][i][j] = best_f0
+
+        ans = 0
+        for i in range(n):
+            for j in range(m):
+                if grid[i][j] == 1:
+                    for d in range(4):
+                        ans = max(ans, 1 + f2[d][i][j])
+
+        return ans
+
+# print(Solution().lenOfVDiagonal([[1,2,0,2,0],[2,2,0,2,0],[2,2,2,2,2],[2,2,2,2,2],[2,2,2,2,2]]))
+
+
+
+class Solution(object):
+    def groupAnagrams(self, strs):
+        groups = {}
+        for w in strs:
+            key = tuple(sorted(w))  
+            if key not in groups:
+                groups[key] = []
+            groups[key].append(w) 
+            print(groups)
+        return list(groups.values())
+
+# print(Solution().groupAnagrams(["eat","tea","tan","ate","nat","bat"]))
+
+class Solution(object):
+    def maxSubArray(self, nums):
+        best = nums[0]
+        cur = 0
+        for x in nums:
+            cur = max(x, cur + x)
+            best = max(best, cur) 
+        return best
+    
+# print(Solution().maxSubArray([-2,1,-3,4,-1,2,1,-5,4]))    
+
+
+class Solution(object):
+    def spiralOrder(self, matrix):
+        ans = []
+        while matrix:
+            ans.extend(matrix.pop(0))
+            print(matrix)
+            matrix = list(zip(*matrix))[::-1]
+            print(matrix)
+        return ans
+        
+
+
+class Solution(object):
+    def spiralOrder(self, matrix):
+        if not matrix or not matrix[0]:
+            return []
+        m, n = len(matrix), len(matrix[0])
+        seen = [[False]*n for _ in range(m)]
+        ans = []
+        dirs = [(0,1),(1,0),(0,-1),(-1,0)]  
+
+        def dfs(i, j, d):
+            ans.append(matrix[i][j])
+            seen[i][j] = True
+            for _ in range(4):
+                ni, nj = i + dirs[d][0], j + dirs[d][1]
+                if 0 <= ni < m and 0 <= nj < n and not seen[ni][nj]:
+                    dfs(ni, nj, d)
+                    return
+                d = (d + 1) % 4 
+
+        dfs(0, 0, 0)
+        return ans
+    
+# print(Solution().spiralOrder([[1,2,3],[4,5,6],[7,8,9]]))
+
+class Solution(object):
+    def divide(self, dividend, divisor):
+        X = 1
+        Y = 1
+        if dividend < 0:
+            X = -1
+        if divisor < 0:
+            Y = -1
+        ans = abs(dividend) // abs(divisor) * X * Y
+        if ans > 2**31 - 1:
+            return 2**31 - 1
+        if ans < -2**31:
+            return -2**31
+        return ans
+
+# print(Solution().divide(10, 3))
+# print(Solution().divide(7, -3))
+# print(Solution().divide(-2147483648, -1))
+
+
+
+
+class Solution(object):
+    def findSubstring(self, s, words):
+        ans = []
+        n = len(words)
+        m = len(words[0])
+        for i in range(len(s) - n * m + 1):
+            sub = s[i:i + n * m]
+            sub_words = [sub[j * m:(j+1) * m] for j in range(n)]
+            if sorted(sub_words) == sorted(words):
+                ans.append(i)
+        return ans
+    
+# print(Solution().findSubstring("barfoothefoobarman", ["foo","bar"]))
+# print(Solution().findSubstring("wordgoodgoodgoodbestword", ["word","good","best","word"]))
+
+
+class Solution(object):
+    def canJump(self, nums):
+        n = len(nums)
+        if n == 1:
+            return True
+        max_reach = 0
+        for i in range(n):
+            if i > max_reach:
+                return False
+            max_reach = max(max_reach, i + nums[i])
+        return True
+    
+# print(Solution().canJump([3,2,1,0,4]))
+
+
+
+class Solution(object):
+    def topKFrequent(self, nums, k):
+        count = {}
+        for num in nums:
+            count[num] = 1 + count.get(num, 0)
+        arr = []
+        for num, cnt in count.items():
+            arr.append([cnt, num])
+        arr.sort()
+        print(arr)
+        res = []
+        while len(res) < k:
+            print(res)
+            res.append(arr.pop()[1])
+        return res
+
+    
+# print(Solution().topKFrequent([6,0,1,4,9,7,-3,1,-4,-8,4,-7,-3,3,2,-3,9,5,-4,0], 6))
+
+
+class Solution(object):
+    def isValidSudoku(self, board):
+        rows = [set() for _ in range(9)]
+        cols = [set() for _ in range(9)]
+        boxes = [set() for _ in range(9)]
+
+        for r in range(9):
+            for c in range(9):
+                val = board[r][c]
+                if val == ".":
+                    continue
+                b = (r//3) * 3 + (c//3)
+                if val in rows[r] or val in cols[c] or val in boxes[b]:
+                    return False
+                rows[r].add(val)
+                cols[c].add(val)
+                boxes[b].add(val)
+                print(rows,cols,boxes)
+            return True
+
+
+# print(Solution().isValidSudoku([["5","3",".",".","7",".",".",".","."]
+#                                 ,["6",".",".","1","9","5",".",".","."]
+#                                 ,[".","9","8",".",".",".",".","6","."]
+#                                 ,["8",".",".",".","6",".",".",".","3"]
+#                                 ,["4",".",".","8",".","3",".",".","1"]
+#                                 ,["7",".",".",".","2",".",".",".","6"]
+#                                 ,[".","6",".",".",".",".","2","8","."]
+#                                 ,[".",".",".","4","1","9",".",".","5"]
+#                                 ,[".",".",".",".","8",".",".","7","9"]]))
+
+
+
+class Solution(object):
+    def merge(self, intervals):
+        """
+        :type intervals: List[List[int]]
+        :rtype: List[List[int]]
+        """
+        if not intervals:
+            return []
+        print(intervals)
+        intervals.sort()
+        print(intervals)
+
+        merged = [intervals[0]]
+        for s, e in intervals[1:]:
+            last_s, last_e = merged[-1]
+            if s <= last_e:             
+                merged[-1][1] = max(last_e, e)
+            else:
+                merged.append([s, e])
+
+        return merged
+        
+# print(Solution().merge([[1,3],[0,6],[8,10],[15,18]]))
+
+
+class Solution(object):
+    def search(self, nums, target):
+        counter = 0
+        for i in nums:
+            if i == target:
+                return counter
+            counter += 1
+        return -1
+    
+
+class Solution(object):
+    def search(self, nums, target):
+        l, r = 0, len(nums) - 1
+        while l <= r:
+            m = (l + r) // 2
+            print(m)
+            if nums[m] == target:
+                return m
+            if nums[l] <= nums[m]:
+                if nums[l] <= target < nums[m]:
+                    r = m - 1
+                else:
+                    l = m + 1
+            else:
+                if nums[m] < target <= nums[r]:
+                    l = m + 1
+                else:
+                    r = m - 1
+        return -1
+
+
+# print(Solution().search([3,5,6,7,0,1,2], 0))
+
+
+# Definition for singly-linked list.
+class ListNode(object):
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+
+class Solution(object):
+    def reverseList(self, head):
+        cur = head
+        prev = None
+        while cur:
+            temp = cur.next
+            cur.next = prev
+            prev = cur
+            cur = temp
+        return prev
+
+
+
+
